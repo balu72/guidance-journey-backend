@@ -4,3 +4,4 @@ __pycache__/
 .env
 instance/
 venv/
+setup_flask_app.sh
