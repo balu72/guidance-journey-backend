@@ -9,6 +9,9 @@ client_bp = Blueprint('client_routes', __name__)
 clients = [
     Client(1, "Client A", "active").to_dict(),
     Client(2, "Client B", "inactive").to_dict(),
+    Client(3, "Client C", "active").to_dict(),
+    Client(4, "Client D", "inactive").to_dict(),
+    Client(5, "Client E", "active").to_dict()
 ]
 
 @client_bp.route('/', methods=['GET'])
