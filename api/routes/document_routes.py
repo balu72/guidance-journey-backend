@@ -11,7 +11,7 @@ documents = [
     "clientId": "client-uuid-1",
     "type": "Counselling Objective",
     "content": "Document content...",
-    "sent": true,
+    "sent": True,
     "sentDate": "2023-11-15T10:00:00Z",
     "createdAt": "2023-11-10T09:00:00Z",
     "updatedAt": "2023-11-15T10:00:00Z"
@@ -21,8 +21,8 @@ documents = [
     "clientId": "client-uuid-2",
     "type": "Session Summary",
     "content": "Document content...",
-    "sent": false,
-    "sentDate": null,
+    "sent": False,
+    "sentDate": None,
     "createdAt": "2023-11-12T14:00:00Z",
     "updatedAt": "2023-11-12T14:00:00Z"
   }
