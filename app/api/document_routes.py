@@ -29,7 +29,7 @@ documents = [
 ]
 
 
-@document_bp.route('/api/documents', methods=['GET'])
+@document_bp.route('/documents', methods=['GET'])
 def get_documents():
     try:
         if documents:
@@ -39,7 +39,7 @@ def get_documents():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents', methods=['POST'])
+@document_bp.route('/documents', methods=['POST'])
 def create_document():
     try:
         data = request.get_json()
@@ -64,7 +64,7 @@ def create_document():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents/<document_id>', methods=['GET'])
+@document_bp.route('/documents/<document_id>', methods=['GET'])
 def get_document(document_id):
     try:
         document = next((doc for doc in documents if doc['id'] == document_id), None)
@@ -75,7 +75,7 @@ def get_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500  
     
-@document_bp.route('/api/documents/<document_id>', methods=['PUT'])
+@document_bp.route('/documents/<document_id>', methods=['PUT'])
 def update_document(document_id):
     try:
         data = request.get_json()
@@ -96,7 +96,7 @@ def update_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents/<document_id>', methods=['DELETE'])
+@document_bp.route('/documents/<document_id>', methods=['DELETE'])
 def delete_document(document_id):
     try:
         global documents
@@ -118,7 +118,7 @@ def send_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents/<document_id>/unsend', methods=['POST'])
+@document_bp.route('/documents/<document_id>/unsend', methods=['POST'])
 def unsend_document(document_id):
     try:
         document = next((doc for doc in documents if doc['id'] == document_id), None)
@@ -131,7 +131,7 @@ def unsend_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents/<document_id>/download', methods=['GET'])
+@document_bp.route('/documents/<document_id>/download', methods=['GET'])
 def download_document(document_id):
     try:
         document = next((doc for doc in documents if doc['id'] == document_id), None)
@@ -143,7 +143,7 @@ def download_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500      
     
-@document_bp.route('/api/documents/<document_id>/preview', methods=['GET'])
+@document_bp.route('/documents/<document_id>/preview', methods=['GET'])
 def preview_document(document_id):
     try:
         document = next((doc for doc in documents if doc['id'] == document_id), None)
@@ -154,7 +154,7 @@ def preview_document(document_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@document_bp.route('/api/documents/<document_id>/send-reminder', methods=['POST'])
+@document_bp.route('/documents/<document_id>/send-reminder', methods=['POST'])
 def send_reminder(document_id):
     try:
         document = next((doc for doc in documents if doc['id'] == document_id), None)

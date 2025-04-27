@@ -27,7 +27,7 @@ sessions = [
 ]
 
 
-@session_bp.route('/api/sessions', methods=['GET'])
+@session_bp.route('/sessions', methods=['GET'])
 def get_sessions():
     try:
         if sessions:
@@ -37,7 +37,7 @@ def get_sessions():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@session_bp.route('/api/sessions', methods=['POST'])
+@session_bp.route('/sessions', methods=['POST'])
 def create_session():
     try:
         data = request.get_json()
@@ -65,7 +65,7 @@ def create_session():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@session_bp.route('/api/sessions/<session_id>', methods=['GET'])
+@session_bp.route('/sessions/<session_id>', methods=['GET'])
 def get_session(session_id):
     try:
         session = next((sess for sess in sessions if sess['id'] == session_id), None)
@@ -76,7 +76,7 @@ def get_session(session_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@session_bp.route('/api/sessions/<session_id>', methods=['PUT'])
+@session_bp.route('/sessions/<session_id>', methods=['PUT'])
 def update_session(session_id):
     try:
         data = request.get_json()
@@ -96,7 +96,7 @@ def update_session(session_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@session_bp.route('/api/sessions/<session_id>', methods=['DELETE'])
+@session_bp.route('/sessions/<session_id>', methods=['DELETE'])
 def delete_session(session_id):
     try:
         global sessions
@@ -106,7 +106,7 @@ def delete_session(session_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@session_bp.route('/api/sessions/<session_id>/complete', methods=['POST'])
+@session_bp.route('/sessions/<session_id>/complete', methods=['POST'])
 def complete_session(session_id):   
     try:
         session = next((sess for sess in sessions if sess['id'] == session_id), None)
@@ -118,7 +118,7 @@ def complete_session(session_id):
             return jsonify({"message": "Session not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@session_bp.route('/api/sessions/<session_id>/zoom', methods=['POST'])
+@session_bp.route('/sessions/<session_id>/zoom', methods=['POST'])
 def set_zoom_link(session_id):
     try:
         data = request.get_json()
@@ -133,7 +133,7 @@ def set_zoom_link(session_id):
             return jsonify({"message": "Session not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@session_bp.route('/api/sessions/<session_id>/notes', methods=['POST'])
+@session_bp.route('/sessions/<session_id>/notes', methods=['POST'])
 def add_notes(session_id):
     try:
         data = request.get_json()
@@ -159,7 +159,7 @@ def get_notes(session_id):
             return jsonify({"message": "Session not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@session_bp.route('/api/sessions/<session_id>/zoom', methods=['GET'])
+@session_bp.route('/sessions/<session_id>/zoom', methods=['GET'])
 def get_zoom_link(session_id):
     try:
         session = next((sess for sess in sessions if sess['id'] == session_id), None)
@@ -170,7 +170,7 @@ def get_zoom_link(session_id):
             return jsonify({"message": "Session not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@session_bp.route('/api/sessions/<session_id>/completed', methods=['GET'])
+@session_bp.route('/sessions/<session_id>/completed', methods=['GET'])
 def get_session_status(session_id):
     try:
         session = next((sess for sess in sessions if sess['id'] == session_id), None)
@@ -181,7 +181,7 @@ def get_session_status(session_id):
             return jsonify({"message": "Session not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@session_bp.route('/api/sessions/<session_id>/completed', methods=['PUT'])
+@session_bp.route('/sessions/<session_id>/completed', methods=['PUT'])
 def update_session_status(session_id):  
     try:
         data = request.get_json()
