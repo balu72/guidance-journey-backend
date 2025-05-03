@@ -1,69 +1,168 @@
 import logging
 from flask import Blueprint, jsonify, request
+from flask_cors import CORS
+from ..models import db
 from ..models.client import Client
+import uuid
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Sample data (replace with a database in a real application)
-clients = [
-    {
-        "id": "client-uuid-1",
-        "name": "John Doe",
-        "email": "john.doe@example.com",
-        "phone": "123-456-7890",
-        "source": "Website",
-        "status": "First Session Scheduled",
-        "notes": "Some notes about John",
-        "createdAt": "2023-10-26T10:00:00Z",
-        "updatedAt": "2023-10-26T12:30:00Z"
-    },
-    {
-        "id": "client-uuid-2",
-        "name": "Jane Smith",
-        "email": "jane.smith@example.com",
-        "phone": "987-654-3210",
-        "source": "Referral",
-        "status": "Second Session Completed",
-        "notes": "Some notes about Jane",
-        "createdAt": "2023-10-25T09:00:00Z",
-        "updatedAt": "2023-10-25T11:00:00Z"
-    },
-]
-
 client_bp = Blueprint('client_routes', __name__)
+CORS(client_bp)
+
 @client_bp.route('/clients', methods=['GET'])
 def get_clients():
     logger.info("Request received to get all clients.")
     try:
         # Query the database to get all clients
-       # clients = Client.query.all()
+        clients = Client.query.all()
 
         # Convert the client objects to a list of dictionaries for JSON serialization
-        #client_list = [client.to_dict() for client in clients]
-       # logger.info(f"Successfully retrieved {len(client_list)} clients.")
-        #return jsonify(client_list)
-        return jsonify(clients), 200    
+        client_list = [client.to_dict() for client in clients]
+        logger.info(f"Successfully retrieved {len(client_list)} clients.")
+        return jsonify(client_list), 200
     except Exception as e:
         logger.error(f"Error retrieving clients: {e}")
         return jsonify({"error": str(e)}), 500
 
-
-@client_bp.route('/clients/<int:client_id>', methods=['GET'])
+@client_bp.route('/clients/<uuid:client_id>', methods=['GET'])
 def get_client(client_id):
     logger.info(f"Request received to get client with ID: {client_id}")
     try:
         # Query the database to get a specific client by ID
-        # client = Client.query.get(client_id)
-
-        if client_id:
+        client = Client.query.get(client_id)
+        
+        if client:
             logger.info(f"Successfully retrieved client with ID: {client_id}")
-            #return jsonify(client.to_dict())
-            return jsonify(clients[client_id]), 200
-        else:
-            logger.warning(f"Client with ID {client_id} not found.")
+            return jsonify(client.to_dict()), 200
+        
+        logger.warning(f"Client with ID {client_id} not found.")
         return jsonify({"error": "Client not found"}), 404
     except Exception as e:
         logger.error(f"Error retrieving client with ID {client_id}: {e}")
-        return jsonify({"Error": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
+@client_bp.route('/clients', methods=['POST'])
+def create_client():
+    logger.info("Request received to create a new client.")
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        if not data.get('name') or not data.get('email'):
+            logger.warning("Missing required fields in client creation request.")
+            return jsonify({"error": "Name and email are required fields"}), 400
+        
+        # Check if client with this email already exists
+        existing_client = Client.query.filter_by(email=data.get('email')).first()
+        if existing_client:
+            logger.warning(f"Client with email {data.get('email')} already exists.")
+            return jsonify({"error": "A client with this email already exists"}), 409
+        
+        # Create new client
+        new_client = Client(
+            name=data.get('name'),
+            email=data.get('email'),
+            phone=data.get('phone'),
+            source=data.get('source'),
+            status=data.get('status', 'Initial Contact'),
+            notes=data.get('notes')
+        )
+        
+        db.session.add(new_client)
+        db.session.commit()
+        
+        logger.info(f"Successfully created new client with ID: {new_client.id}")
+        return jsonify(new_client.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating client: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@client_bp.route('/clients/<uuid:client_id>', methods=['PUT'])
+def update_client(client_id):
+    logger.info(f"Request received to update client with ID: {client_id}")
+    try:
+        data = request.get_json()
+        client = Client.query.get(client_id)
+        
+        if not client:
+            logger.warning(f"Client with ID {client_id} not found.")
+            return jsonify({"error": "Client not found"}), 404
+        
+        # Update client fields
+        if 'name' in data:
+            client.name = data['name']
+        if 'email' in data:
+            # Check if email is being changed and if it's already in use
+            if data['email'] != client.email:
+                existing_client = Client.query.filter_by(email=data['email']).first()
+                if existing_client:
+                    logger.warning(f"Email {data['email']} is already in use.")
+                    return jsonify({"error": "Email is already in use"}), 409
+            client.email = data['email']
+        if 'phone' in data:
+            client.phone = data['phone']
+        if 'source' in data:
+            client.source = data['source']
+        if 'status' in data:
+            client.status = data['status']
+        if 'notes' in data:
+            client.notes = data['notes']
+        
+        db.session.commit()
+        
+        logger.info(f"Successfully updated client with ID: {client_id}")
+        return jsonify(client.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating client with ID {client_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@client_bp.route('/clients/<uuid:client_id>', methods=['DELETE'])
+def delete_client(client_id):
+    logger.info(f"Request received to delete client with ID: {client_id}")
+    try:
+        client = Client.query.get(client_id)
+        
+        if not client:
+            logger.warning(f"Client with ID {client_id} not found.")
+            return jsonify({"error": "Client not found"}), 404
+        
+        db.session.delete(client)
+        db.session.commit()
+        
+        logger.info(f"Successfully deleted client with ID: {client_id}")
+        return jsonify({"message": "Client deleted successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting client with ID {client_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@client_bp.route('/clients/<uuid:client_id>/status', methods=['PUT'])
+def update_client_status(client_id):
+    logger.info(f"Request received to update status for client with ID: {client_id}")
+    try:
+        data = request.get_json()
+        
+        if 'status' not in data:
+            logger.warning("Missing status in request.")
+            return jsonify({"error": "Status is required"}), 400
+        
+        client = Client.query.get(client_id)
+        
+        if not client:
+            logger.warning(f"Client with ID {client_id} not found.")
+            return jsonify({"error": "Client not found"}), 404
+        
+        client.status = data['status']
+        db.session.commit()
+        
+        logger.info(f"Successfully updated status for client with ID: {client_id}")
+        return jsonify(client.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating status for client with ID {client_id}: {e}")
+        return jsonify({"error": str(e)}), 500
