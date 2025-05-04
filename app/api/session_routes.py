@@ -96,6 +96,7 @@ def create_session():
             client_id=client_id,
             session_number=data.get('sessionNumber'),
             date=date,
+            category=data.get('category', 'Initial Consultation'),
             completed=data.get('completed', False),
             notes=data.get('notes'),
             zoom_link=data.get('zoomLink')
@@ -146,6 +147,9 @@ def update_session(session_id):
             
         if 'notes' in data:
             session.notes = data['notes']
+            
+        if 'category' in data:
+            session.category = data['category']
             
         if 'zoomLink' in data:
             session.zoom_link = data['zoomLink']

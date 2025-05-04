@@ -1,6 +1,9 @@
 import logging
 from app import create_app
 from app.models import db
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

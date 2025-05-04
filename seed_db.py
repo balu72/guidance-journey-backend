@@ -6,6 +6,9 @@ from app.models.client import Client
 from app.models.session import Session
 from app.models.document import Document
 import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
