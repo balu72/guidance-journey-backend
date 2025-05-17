@@ -1,14 +1,13 @@
 
 from . import db
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 from datetime import datetime
 
 class Document(db.Model):
     __tablename__ = 'documents'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = db.Column(UUID(as_uuid=True), db.ForeignKey('clients.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    display_id = db.Column(db.String(13), unique=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     type = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     sent = db.Column(db.Boolean, default=False)
@@ -25,8 +24,8 @@ class Document(db.Model):
 
     def to_dict(self):
         return {
-            "id": str(self.id),
-            "clientId": str(self.client_id),
+            "id": self.display_id,  # Return display_id as the public ID
+            "clientId": self.client.display_id,  # Return client's display_id
             "type": self.type,
             "content": self.content,
             "sent": self.sent,

@@ -1,13 +1,7 @@
 import os
 
-DEBUG = True
-SECRET_KEY = os.environ.get("SECRET_KEY", "default-secret-key")
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+db_path = os.path.join(BASE_DIR, "mydatabase.db")
 
-# Database configuration
+SQLALCHEMY_DATABASE_URI = f"sqlite:///{db_path}"
 
-db_user = os.environ.get("DB_USER", "postgres")
-db_password = os.environ.get("DB_PASSWORD", "your_password")
-db_host = os.environ.get("DB_HOST", "localhost")
-db_name = os.environ.get("DB_NAME", "mylo")
-SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f'postgresql+pg8000://{db_user}:{db_password}@{db_host}/{db_name}'
-SQLALCHEMY_TRACK_MODIFICATIONS = False

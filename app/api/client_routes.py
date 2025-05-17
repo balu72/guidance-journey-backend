@@ -27,21 +27,21 @@ def get_clients():
         logger.error(f"Error retrieving clients: {e}")
         return jsonify({"error": str(e)}), 500
 
-@client_bp.route('/clients/<uuid:client_id>', methods=['GET'])
-def get_client(client_id):
-    logger.info(f"Request received to get client with ID: {client_id}")
+@client_bp.route('/clients/<string:client_display_id>', methods=['GET'])
+def get_client(client_display_id):
+    logger.info(f"Request received to get client with ID: {client_display_id}")
     try:
-        # Query the database to get a specific client by ID
-        client = Client.query.get(client_id)
+        # Query the database to get a specific client by display_id
+        client = Client.query.filter_by(display_id=client_display_id).first()
         
         if client:
-            logger.info(f"Successfully retrieved client with ID: {client_id}")
+            logger.info(f"Successfully retrieved client with ID: {client_display_id}")
             return jsonify(client.to_dict()), 200
         
-        logger.warning(f"Client with ID {client_id} not found.")
+        logger.warning(f"Client with ID {client_display_id} not found.")
         return jsonify({"error": "Client not found"}), 404
     except Exception as e:
-        logger.error(f"Error retrieving client with ID {client_id}: {e}")
+        logger.error(f"Error retrieving client with ID {client_display_id}: {e}")
         return jsonify({"error": str(e)}), 500
 
 @client_bp.route('/clients', methods=['POST'])
@@ -55,7 +55,7 @@ def create_client():
             logger.warning("Missing required fields in client creation request.")
             return jsonify({"error": "Name and email are required fields"}), 400
         
-        # Check if client with this email already exists
+         # Check if client with this email already exists
         existing_client = Client.query.filter_by(email=data.get('email')).first()
         if existing_client:
             logger.warning(f"Client with email {data.get('email')} already exists.")
@@ -81,15 +81,15 @@ def create_client():
         logger.error(f"Error creating client: {e}")
         return jsonify({"error": str(e)}), 500
 
-@client_bp.route('/clients/<uuid:client_id>', methods=['PUT'])
-def update_client(client_id):
-    logger.info(f"Request received to update client with ID: {client_id}")
+@client_bp.route('/clients/<string:client_display_id>', methods=['PUT'])
+def update_client(client_display_id):
+    logger.info(f"Request received to update client with ID: {client_display_id}")
     try:
         data = request.get_json()
-        client = Client.query.get(client_id)
+        client = Client.query.filter_by(display_id=client_display_id).first()
         
         if not client:
-            logger.warning(f"Client with ID {client_id} not found.")
+            logger.warning(f"Client with ID {client_display_id} not found.")
             return jsonify({"error": "Client not found"}), 404
         
         # Update client fields
@@ -114,36 +114,36 @@ def update_client(client_id):
         
         db.session.commit()
         
-        logger.info(f"Successfully updated client with ID: {client_id}")
+        logger.info(f"Successfully updated client with ID: {client_display_id}")
         return jsonify(client.to_dict()), 200
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error updating client with ID {client_id}: {e}")
+        logger.error(f"Error updating client with ID {client_display_id}: {e}")
         return jsonify({"error": str(e)}), 500
 
-@client_bp.route('/clients/<uuid:client_id>', methods=['DELETE'])
-def delete_client(client_id):
-    logger.info(f"Request received to delete client with ID: {client_id}")
+@client_bp.route('/clients/<string:client_display_id>', methods=['DELETE'])
+def delete_client(client_display_id):
+    logger.info(f"Request received to delete client with ID: {client_display_id}")
     try:
-        client = Client.query.get(client_id)
+        client = Client.query.filter_by(display_id=client_display_id).first()
         
         if not client:
-            logger.warning(f"Client with ID {client_id} not found.")
+            logger.warning(f"Client with ID {client_display_id} not found.")
             return jsonify({"error": "Client not found"}), 404
         
         db.session.delete(client)
         db.session.commit()
         
-        logger.info(f"Successfully deleted client with ID: {client_id}")
+        logger.info(f"Successfully deleted client with ID: {client_display_id}")
         return jsonify({"message": "Client deleted successfully"}), 200
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error deleting client with ID {client_id}: {e}")
+        logger.error(f"Error deleting client with ID {client_display_id}: {e}")
         return jsonify({"error": str(e)}), 500
 
-@client_bp.route('/clients/<uuid:client_id>/status', methods=['PUT'])
-def update_client_status(client_id):
-    logger.info(f"Request received to update status for client with ID: {client_id}")
+@client_bp.route('/clients/<string:client_display_id>/status', methods=['PUT'])
+def update_client_status(client_display_id):
+    logger.info(f"Request received to update status for client with ID: {client_display_id}")
     try:
         data = request.get_json()
         
@@ -151,18 +151,18 @@ def update_client_status(client_id):
             logger.warning("Missing status in request.")
             return jsonify({"error": "Status is required"}), 400
         
-        client = Client.query.get(client_id)
+        client = Client.query.filter_by(display_id=client_display_id).first()
         
         if not client:
-            logger.warning(f"Client with ID {client_id} not found.")
+            logger.warning(f"Client with ID {client_display_id} not found.")
             return jsonify({"error": "Client not found"}), 404
         
         client.status = data['status']
         db.session.commit()
         
-        logger.info(f"Successfully updated status for client with ID: {client_id}")
+        logger.info(f"Successfully updated status for client with ID: {client_display_id}")
         return jsonify(client.to_dict()), 200
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error updating status for client with ID {client_id}: {e}")
+        logger.error(f"Error updating status for client with ID {client_display_id}: {e}")
         return jsonify({"error": str(e)}), 500

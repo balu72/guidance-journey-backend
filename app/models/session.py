@@ -1,14 +1,13 @@
 
 from . import db
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 from datetime import datetime
 
 class Session(db.Model):
     __tablename__ = 'sessions'
 
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    client_id = db.Column(UUID(as_uuid=True), db.ForeignKey('clients.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    display_id = db.Column(db.String(12), unique=True)
+    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
     session_number = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     category = db.Column(db.String(50), default='Initial Consultation')
@@ -27,8 +26,8 @@ class Session(db.Model):
 
     def to_dict(self):
         return {
-            "id": str(self.id),
-            "clientId": str(self.client_id),
+            "id": self.display_id,  # Return display_id as the public ID
+            "clientId": self.client.display_id,  # Return client's display_id
             "sessionNumber": self.session_number,
             "date": self.date.isoformat() if self.date else None,
             "category": self.category,
