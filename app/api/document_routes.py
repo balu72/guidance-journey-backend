@@ -85,7 +85,12 @@ def create_document():
             logger.warning(f"Client with ID {client_display_id} not found.")
             return jsonify({"error": "Client not found"}), 404
         
-        # Create new document
+        # Generate display_id
+        max_id_result = db.session.query(db.func.max(Document.id)).first()
+        next_id = 1 if max_id_result[0] is None else max_id_result[0] + 1
+        display_id = f"DOCUMENT-{next_id:03d}"
+        
+        # Create new document with display_id
         new_document = Document(
             client_id=client.id,
             type=data.get('type'),
@@ -93,11 +98,12 @@ def create_document():
             sent=data.get('sent', False),
             sent_date=datetime.fromisoformat(data.get('sentDate').replace('Z', '+00:00')) if data.get('sentDate') else None
         )
+        new_document.display_id = display_id
         
         db.session.add(new_document)
         db.session.commit()
         
-        logger.info(f"Successfully created new document with ID: {new_document.id}")
+        logger.info(f"Successfully created new document with ID: {display_id}")
         return jsonify(new_document.to_dict()), 201
     except Exception as e:
         db.session.rollback()

@@ -61,7 +61,12 @@ def create_client():
             logger.warning(f"Client with email {data.get('email')} already exists.")
             return jsonify({"error": "A client with this email already exists"}), 409
         
-        # Create new client
+        # Generate display_id
+        max_id_result = db.session.query(db.func.max(Client.id)).first()
+        next_id = 1 if max_id_result[0] is None else max_id_result[0] + 1
+        display_id = f"CLIENT-{next_id:03d}"
+        
+        # Create new client with display_id
         new_client = Client(
             name=data.get('name'),
             email=data.get('email'),
@@ -70,11 +75,12 @@ def create_client():
             status=data.get('status', 'Initial Contact'),
             notes=data.get('notes')
         )
+        new_client.display_id = display_id
         
         db.session.add(new_client)
         db.session.commit()
         
-        logger.info(f"Successfully created new client with ID: {new_client.id}")
+        logger.info(f"Successfully created new client with ID: {display_id}")
         return jsonify(new_client.to_dict()), 201
     except Exception as e:
         db.session.rollback()

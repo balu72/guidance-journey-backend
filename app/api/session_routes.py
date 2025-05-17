@@ -91,7 +91,12 @@ def create_session():
             logger.warning(f"Invalid date format: {data.get('date')}")
             return jsonify({"error": "Invalid date format. Use ISO format (e.g., 2023-01-01T12:00:00Z)"}), 400
         
-        # Create new session
+        # Generate display_id
+        max_id_result = db.session.query(db.func.max(Session.id)).first()
+        next_id = 1 if max_id_result[0] is None else max_id_result[0] + 1
+        display_id = f"SESSION-{next_id:03d}"
+        
+        # Create new session with display_id
         new_session = Session(
             client_id=client.id,
             session_number=data.get('sessionNumber'),
@@ -101,11 +106,12 @@ def create_session():
             notes=data.get('notes'),
             zoom_link=data.get('zoomLink')
         )
+        new_session.display_id = display_id
         
         db.session.add(new_session)
         db.session.commit()
         
-        logger.info(f"Successfully created new session with ID: {new_session.id}")
+        logger.info(f"Successfully created new session with ID: {display_id}")
         return jsonify(new_session.to_dict()), 201
     except Exception as e:
         db.session.rollback()
